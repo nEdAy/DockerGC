@@ -1,0 +1,26 @@
+# For home use, you don't need to edit anymore.
+version: '3'
+services:
+  mongodb:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - data:/data/db
+  grasscutter:
+    image: siakbary/dockergs:alpine-gc-3.6
+    command: --database 'mongodb://mongodb:27017' --web_ip '2.0.0.100' --web_port "80" --game_ip '2.0.0.100' --download_resource 'yes' --java '-Xmx1G' --ssl "false" --web_url_ssl "false"
+    restart: unless-stopped
+    volumes:
+      - resources:/home/dockergs/resources
+    ports:
+      - "22102:22102/udp"
+      - "80:80/tcp"
+    depends_on:
+      - mongodb
+    stdin_open: true
+    tty: true
+volumes:
+ data:
+ resources:

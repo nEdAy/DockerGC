@@ -1,0 +1,48 @@
+version: '3'
+services:
+  web:
+    image: jc21/nginx-proxy-manager
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data_web:/data
+      - ./letsencrypt:/etc/letsencrypt
+  mongodb:
+    restart: always
+    image: mongo
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    ports:
+      - "5712:27017"
+    volumes:
+      - ./data_db:/data/db
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: yourusername
+     MONGO_INITDB_ROOT_PASSWORD: moepasswordroot
+  grasscutter:
+    restart: always
+    container_name: dockergs
+    image: siakbary/dockergs:alpine-gc-3.5
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+    command: --database 'mongodb://yourusername:moepasswordroot@mongodb:27017' --web_ip '2.0.0.100' --web_port "80" --game_ip '2.0.0.100' --download_resource 'yes' --java '-Xmx1G' --ssl "false" --web_url_ssl "false"
+    volumes:
+      - ./res/31:/home/dockergs/resources
+    ports:
+      - "22102:22102/udp"
+    depends_on:
+      - mongodb
+    stdin_open: true
+    tty: true
+    init: true

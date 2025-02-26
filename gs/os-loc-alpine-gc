@@ -1,0 +1,23 @@
+FROM eclipse-temurin:22-jdk-alpine
+RUN  \
+     # Install json utilities for config.json, TODO: remove git after zip function in gc finished and nodejs, procps used for ps monitors
+     apk add --no-cache nodejs git curl procps &&\
+     cd /usr/bin/ && curl -L https://github.com/trentm/json/raw/master/lib/json.js > json && chmod 755 json
+
+# Web (https 443) (http 80) (Game 22102)
+EXPOSE 443 80 22102
+
+# Add User
+RUN addgroup --system dockergs && adduser -S -s /bin/false -G dockergs dockergs
+
+# Sweet Home Alabama :)
+WORKDIR /home/dockergs
+
+# Copy files Grasscutter
+COPY --chown=dockergs:dockergs entrypoint_gc.sh work_gc ./
+RUN mkdir -p ./resources && chown -R dockergs:dockergs ./resources
+
+# User
+USER dockergs
+
+ENTRYPOINT ["sh", "./entrypoint_gc.sh"]

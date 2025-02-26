@@ -1,4 +1,0 @@
-[submodule "gc/Grasscutter"]
-	path = gc/Grasscutter
-	url = https://github.com/akbaryahya/Grasscutter.git
-	branch = development

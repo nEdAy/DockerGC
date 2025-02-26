@@ -1,0 +1,24 @@
+FROM eclipse-temurin:22-jdk
+RUN  \
+     apt-get update && apt-get -y install git curl nodejs &&\
+     # Install json utilities for config.json
+     cd /usr/bin/ && curl -L https://github.com/trentm/json/raw/master/lib/json.js > json && chmod 755 json &&\
+     apt-get clean && apt-get autoclean && apt-get autoremove --yes
+
+# Web (https 443) (http 80) (Game 22102)
+EXPOSE 443 80 22102
+
+# Add User
+RUN adduser --system --group dockergs
+
+# Sweet Home Alabama :)
+WORKDIR /home/dockergs
+
+# Copy files Grasscutter
+COPY --chown=dockergs:dockergs entrypoint_gc.sh work_gc ./
+RUN mkdir -p ./resources && chown -R dockergs:dockergs ./resources
+
+# User
+USER dockergs
+
+ENTRYPOINT ["sh", "./entrypoint_gc.sh"]

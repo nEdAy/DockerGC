@@ -1,89 +1,135 @@
-# DockerGC
-DockerGC is a container that runs Grasscutter (*some anime game* server reimplementation) with just a single command.<br>
-[![dockeri.co](https://dockeri.co/image/siakbary/dockergc)](https://hub.docker.com/r/siakbary/dockergc)
+# DockerGS
+DockerGS is a container that run [Grasscutter](https://github.com/Grasscutters/Grasscutter) (**some anime game**) with just a single command.<br>
+## How to connect to server
+[Since I don't want to write same post, please visit this](https://www.yuuki.me/2022/09/how-to-connect-genshin-impact-private.html)
 ## How to create a server:
-- Install Docker + MongoDB
+### Docker Version
+- Install [Docker](https://docs.docker.com/engine/install/) + ([MongoDB](https://www.mongodb.com/try/download/community) If you want to run outside container)
 - Open Terminal and Enter:
 ```sh
-# Network (just once)
-docker network create gc
-# Datebase (just once) (db:27017 change ip and delete this if you already have a database)
-docker run --rm -it --network gc --name db -d mongo &
-# Game server (just once download resources with -f 'yes' after that you can set -f 'no')
-docker run --rm -it --network gc -v resources:/home/Grasscutter/resources -p 22102:22102/udp -p 443:443/tcp siakbary/dockergc:debian-dev-4.2 -d 'mongodb://db:27017' -b 'localhost' -f 'yes'
+# Database (just once) (use this if you don't have a database outside container or want to use between containers)
+docker run --rm -it --name db_gc -p 2777:27017/tcp -d mongo &
+# Game server (just once download resources with -download_resource 'yes' after that you can set -download_resource 'no') (remember replace 2.0.0.100 with your pc's ip and don't use "localhost" this is important)
+docker run --rm -it \
+--name dockergs \
+-v resources:/home/dockergs/resources \
+-p 22102:22102/udp \
+-p 80:80/tcp \
+siakbary/dockergs:ubuntu-gc-5.0 \
+--database 'mongodb://2.0.0.100:2777' \
+--web_ip '2.0.0.100' \
+--web_port '80' \
+--game_ip '2.0.0.100' \
+--game_port '22102' \
+--download_resource 'yes' \
+--ssl 'false'
+--web_url_ssl "false"
 ```
-or (if you have compose)
+or if you have [Docker Compose](https://docs.docker.com/compose/install/)
 ```sh
-"docker compose up" or "docker-compose up"
+git clone https://github.com/YuukiPS/DockerGS
+cd DockerGS
+# docker compose up  # windows
+docker-compose up -d # linux
 ```
 - Then type "account create yourusername" if there is a new response open the game.
-- done 🙂
+- Yay
 
-## How to connect: (PC)
-- Before starting, open game first and then logout if you have logged in before and then exit again.
-- Install Fiddler then Open Fiddler then click Tools -> Options -> HTTPS -> Check "Capture Https" and "Decrypt Https" then click "Actions" then click "Trues Root" then click yes if a popup appears.
-- In Fiddler in "FiddlerScript" tab, copy script from [directed.cs](directed.cs) then click save.
-- Login with your username then password with random then login. 🙂
+### Windows (Jar Only)
+1. Download & Install [Java 17 JDK](https://www.youtube.com/watch?v=cL4GcZ6GJV8) & [MongoDB](https://www.youtube.com/watch?v=wcx3f0eUiAw) (If you don't have) (Remember this does not require Install Docker.)
+2. Download file zip, scroll down I'm sure you can find it easily
+3. Open file zip and unzip/open again file DockerGS_GC.tar
+4. When you successfully unzip/open you will find "work_gc" folder click it then Extract it to folder you want (if you have an "Official/other version" Grasscutter you can overwrite it)
+5. Make sure you have a (folder,file) "Resources" which you can get from [Yuuki](https://gitlab.com/yukiz/GrasscutterResources/-/archive/5.0/GrasscutterResources-5.0.zip)
+6. Open Terminal (Make sure you open it by right-clicking on folder that has jar file) then type "java -jar grasscutter.jar"
+7. Have fun :)
 
- ## How to connect: (Android Root) + (Fiddler PC for proxy)
-- Open Fiddler then click Tools -> Options -> HTTPS -> Check "Capture Https" and "Decrypt Https".
-- After you follow it, Go to Tools -> Options -> Connection -> Check "Allow remote computer to connect" and make sure the windows firewall is off and don't forget to change the port other than 8888 (change it like 8887) - [more info](https://www.telerik.com/blogs/how-to-capture-android-traffic-with-fiddler)
-- In Fiddler in "FiddlerScript" tab, copy script from [directed.cs](directed.cs) then click save.
-- On Phone (Android 7+), Install Magisk+MagiskTrustUserCerts - [more info](https://platinmods.com/threads/intercepting-https-traffic-from-apps-on-android-7-and-above-root.131373/)
-- Change proxy on wifi settings with your server ip
-- Login with your username then password with random then login. 🙂
+### Ubuntu (Jar Only)
+TODO
 
-## How to connect: (Android No-Root) (Termux)
-- do backup first (apk & data game) because patching apk cannot be updated with game that is installed now.
-- Install patched apk that accepts user ca certs, unfortunately you will have to uninstall regular and [install apk patched](https://file.yuuki.me/0:/Leak/uc-patched.apk) (If file is miss/not trusted you can do it yourself with [apk-mitm](https://github.com/shroudedcode/apk-mitm))
-- Install Termux
-- use these commands
-```sh
-apt update && apt full-upgrade
-pkg install python wget rustc-dev nano
-python3 -m ensurepip --upgrade
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
-export CARGO_BUILD_TARGET=aarch64-linux-android
-pipx install mitmproxy
-```
-- Now download proxy config: 
-```sh
-wget https://github.com/akbaryahya/Grasscutter/raw/Patch/proxy_config.py
-wget https://github.com/akbaryahya/Grasscutter/raw/Patch/proxy.py
-```
-- Now run mitmproxy: 
-```sh
-mitmdump -s proxy.py -k --ssl-insecure --set block_global=false
-```
-- Then go to wifi settings and set proxy to 127.0.0.1 and 8080. Note that proxies are ignored if you are using a VPN.
-- Open http://mitm.it/ in your browser, download certificate. Then go to settings and install it.
-- Play Game
+## Available
+| Versions | OS | Platform |
+| ------ | ------ | ------ |
+| [5.0 (25)](https://hub.docker.com/r/siakbary/dockergs/tags?page=1&name=alpine-gc-5.0) | Alpine | linux/amd64 |
 
+## Download (Jar Only)
 
-## Bro, I don't want to make a server, so can I just join to your server?
-Yes, Simple way is to just change localhost in file in pastebin to address server you want to connect to.<br>
-For server list please join:<br>
-[![DockerGC](https://discordapp.com/api/guilds/964119462188040202/widget.png?style=banner2)](https://discord.gg/tRYMG7Nm2D)
-
-## HELP
-| Func | Info |
+| Versions | Platform |
 | ------ | ------ |
-| d | is ip address for your database server , note: use computer ip if you want to run on your own pc, no "localhost" because it is ip in container |
-| b | ip public server |
-| v | ip private server |
-| m | Chat Welcome message |
-| e | Email Welcome when registering for the first time |
-| f | re-download resources if you type "yes" this is useful if you already have a resources folder but there is latest update |
-| p | running proxy, if "yes" |
+| [5.0 (25)](https://nightly.link/YuukiPS/DockerGS/workflows/DockerGS_GC_Alpine_5.0_Public/main/DockerGS-GC.zip) | linux/amd64 |
 
+### Some Tips:
+* [Running a JVM in a Container Without Getting Killed](https://blog.csanchez.org/2017/05/31/running-a-jvm-in-a-container-without-getting-killed/)
+* [10 best practices to build a Java container with Docker](https://snyk.io/blog/best-practices-to-build-java-containers-with-docker/)
+
+## How to build this? 
+Source code YuukiPS is closed now because many people are remove "source link,credits" from public server/vip forum download, so we will only provide original [Grasscutter Quest](https://github.com/Anime-Game-Servers/Grasscutter-Quests) or [Grasscutter](https://github.com/Grasscutters/Grasscutter) version for docker/jar later.<br/>
+## If you wish to Contribute YuukiPS, please contact me.
+## Required
+- [Java 17 JDK](https://adoptium.net/temurin/releases) 
+- [Docker](https://docs.docker.com/engine/install/)
+- [Gradle](https://gradle.org/install/)
+- [MongoDB](https://www.mongodb.com/try/download/community)
+- [Lombok](https://stackoverflow.com/questions/67899014/vs-code-did-not-recognize-lombok)
+
+Clone this with
+```sh
+git clone https://github.com/YuukiPS/DockerGS
+cd DockerGS
+cd gs
+
+# 2.0.0.100 is your ip computer, make sure you have mongodb installed
+
+sh run.sh # default build localhost
+
+sh run.sh local res 25 # Get Resources File Based Version Server
+
+sh run.sh local start 25 # run localhost server for without docker
+sh run.sh alpine start 25 2.0.0.100 # run localhost server for with docker alpine
+sh run.sh ubuntu start 25 2.0.0.100 # run localhost server for with docker ubuntu
+
+sh run.sh local build 25 # Build local aja jar only
+sh run.sh alpine build 25 # Build Docker Image Alpine
+sh run.sh ubuntu build 25 # Build Docker Image Ubuntu
+
+sh run.sh ubuntu build 25 multi # Build Docker Image Ubuntu
+
+sh run.sh local sync 25 # Sync Grasscutters to Yuuki
+
+sh run.sh data core # Clone Patch Version
+```
+## Note:
+* If you have a problem with **not foundsh**: Change **CRLF** to **LF**
+
+## Command
+| Variable | Info |
+| ------ | ------ |
+| -db --database | IP Address for your database server, note: use computer ip if you want to run on your own pc/server, no "localhost" because it is IP in Container |
+| -webip --web_ip | IP/Domain Public Web Server |
+| -webport --web_port | Port Public Web Server, if you want http use port 80 and if you want https use 443 (default 80) |
+| -ssl --ssl | If this is set to "true" it will make https not working and if it is "false" it will make http not working. please select: (default false) |
+| -weburlssl --web_url_ssl | This changes URL "https" or "http", This is useful if you have a reverse proxy and have your own SSL. (default false) |
+| -gameip --game_ip | IP Public Game Server |
+| -gameport --game_port | Port Public Game Server |
+| -msgwc --message_welcome | Chat Welcome Message |
+| -nmsv --name_server | Name Server |
+| -nmow --name_owner | Server Owner Name |
+| -nmrg --name_region | Server Region Name |
+| -mailmsg --mail_message | Email welcome when registering for first time |
+| -po --player_online | Player limit online (-1 for unlimited) |
+| -loginpass --login_password | If you want to be more secure by using password feature at login |
+| -dlres --download_resource | Re-download resources if you type "yes" this is useful if you already have a resources folder but there is latest update |
+| -lang --language | Server Language and includes commands [more info](https://github.com/Grasscutters/Grasscutter/tree/development/src/main/resources/languages) |
+| -j --java | -Xms500M -Xmx8G [more info](https://www.baeldung.com/ops/docker-jvm-heap-size) |
+| -h --help | todo |
 ## Port
 | Port | Info |
 | ------ | ------ |
 | 80 | Web Server for HTTP. (Not required) |
 | 443 | Web Server for HTTPS. (required) |
 | 22102 | Game Communication (udp) (required) |
-| 8080 | Mitmproxy (Not required) |
 
-Power by Grasscutter ❤️<br>
-> https://github.com/Melledy/Grasscutter
+## Contribution
+ - [NickTheHuy (Hiro)](https://github.com/NickTheHuy/)<br/>
+
+Power by [Grasscutter](https://github.com/Grasscutters/Grasscutter) ❤️
